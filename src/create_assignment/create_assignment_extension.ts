@@ -266,7 +266,7 @@ class CellWidget extends Panel {
   private async addMetadataListener(cell: Cell) {
     await cell.ready;
     this.metadataChangedHandler = this.getMetadataChangedHandler();
-    cell.model.metadata.changed.connect(this.metadataChangedHandler);
+    cell.model.getMetadata("widgets").changed.connect(this.metadataChangedHandler);
   }
 
   /**
@@ -277,7 +277,7 @@ class CellWidget extends Panel {
   }
 
   private cleanNbgraderData(cell: Cell): void {
-    CellModel.cleanNbgraderData(cell.model.metadata, cell.model.type);
+    CellModel.cleanNbgraderData(cell.model.getMetadata("widgets"), cell.model.type);
   }
 
   /**
@@ -292,7 +292,7 @@ class CellWidget extends Panel {
       return;
     }
     if (this.metadataChangedHandler != null) {
-      this.cell?.model?.metadata?.changed?.disconnect(
+      this.cell?.model?.getMetadata("widgets")?.changed?.disconnect(
           this.metadataChangedHandler);
     }
     if (this.onclick != null) {
@@ -351,7 +351,7 @@ class CellWidget extends Panel {
       }
       else {
         const nbgraderData = CellModel.getNbgraderData(
-            this.cell.model.metadata);
+            this.cell.model.getMetadata("widgets"));
         if (nbgraderData?.grade_id == null) {
           toolData.id = 'cell-' + this.randomString(16);
         }
@@ -364,7 +364,7 @@ class CellWidget extends Panel {
         toolData.points = this.pointsInput.valueAsNumber;
       }
       const data = CellModel.newNbgraderData(toolData);
-      CellModel.setNbgraderData(data, this.cell.model.metadata);
+      CellModel.setNbgraderData(data, this.cell.model.getMetadata("widgets"));
     }
   }
 
@@ -416,9 +416,9 @@ class CellWidget extends Panel {
       return;
     }
     this.cleanNbgraderData(cell);
-    const nbgraderData = CellModel.getNbgraderData(cell.model.metadata);
+    const nbgraderData = CellModel.getNbgraderData(cell.model.getMetadata("widgets"));
     const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
-    CellModel.clearCellType(cell.model.metadata);
+    CellModel.clearCellType(cell.model.getMetadata("widgets"));
     this.updateDisplayClass();
     this.updateValues(toolData);
   }
@@ -549,7 +549,7 @@ class CellWidget extends Panel {
   }
 
   private updateDisplayClass(): void {
-    const data = CellModel.getNbgraderData(this.cell.model.metadata);
+    const data = CellModel.getNbgraderData(this.cell.model.getMetadata("widgets"));
     if (CellModel.isRelevantToNbgrader(data)) {
       this.addClass(CSS_MOD_HIGHLIGHT);
     }
@@ -721,7 +721,7 @@ class NotebookWidget extends Panel {
            }
          }
     };
-    panel.model.cells.changed.connect(this.cellListListener);
+    panel.model.cells.changed.connect(this.children); // ?? update
   }
 
   private addCellWidget(cell: Cell, index = undefined as number): CellWidget {
@@ -735,7 +735,7 @@ class NotebookWidget extends Panel {
     }
     cellWidget.click.connect(this.activeCellWidgetListener);
     const metadataChangedHandler = this.getMetadataChangedHandler(cellWidget);
-    cell.model.metadata.changed.connect(metadataChangedHandler);
+    cell.model.getMetadata("widgets").changed.connect(metadataChangedHandler);
     this.metadataChangedHandlers.set(cellWidget, metadataChangedHandler);
     return cellWidget;
   }
@@ -779,7 +779,7 @@ class NotebookWidget extends Panel {
     }
     if (this.cellListListener != null) {
       this.notebookPanel?.model?.cells?.changed?.disconnect(
-          this.cellListListener);
+          this.children); // ?? Update
     }
     if (this.validateIdsListener != null) {
       this.notebookPanel?.context?.saveState?.disconnect(
@@ -891,7 +891,7 @@ class NotebookWidget extends Panel {
     }
     const handler = this.metadataChangedHandlers?.get(cellWidget);
     if (handler != null) {
-      cell.model?.metadata?.changed?.disconnect(handler);
+      cell.model?.getMetadata("widgets")?.changed?.disconnect(handler);
     }
     this.cellWidgets.delete(cell);
     cellWidget.dispose();
@@ -900,9 +900,9 @@ class NotebookWidget extends Panel {
   private validateIds(): void {
     const set = new Set<string>();
     const valid = /^[a-zA-Z0-9_\-]+$/;
-    const iter = this.notebookPanel.model.cells.iter();
+    const iter = this.notebookPanel.model.cells[Symbol.iterator]();
     for (let cellModel = iter.next(); cellModel != null; cellModel = iter.next()) {
-      const data = CellModel.getNbgraderData(cellModel.metadata);
+      const data = CellModel.getNbgraderData(cellModel.value.getMetadata("widgets")); // ?? Update
 
       if (data == null) continue;
 
@@ -923,10 +923,10 @@ class NotebookWidget extends Panel {
   }
 
   private validateSchemaVersion(): void {
-    const iter = this.notebookPanel.model.cells.iter();
+    const iter = this.notebookPanel.model.cells[Symbol.iterator]();
     for (let cellModel = iter.next(); cellModel != null;
          cellModel = iter.next()) {
-      const data = CellModel.getNbgraderData(cellModel.metadata)
+      const data = CellModel.getNbgraderData(cellModel.value.getMetadata("widgets")) // ?? Update
       let version = data == null ? null : data.schema_version;
       version = version === undefined ? 0 : version;
       if (version != null && version < NBGRADER_SCHEMA_VERSION) {
@@ -1021,10 +1021,10 @@ class NotebookPanelWidget extends Panel {
 
   private calcTotalPoints(): number {
     let totalPoints = 0;
-    const iter = this.notebookWidget.notebookPanel.model.cells.iter();
+    const iter = this.notebookWidget.notebookPanel.model.cells[Symbol.iterator]();
     for (let cellModel = iter.next(); cellModel != null;
          cellModel = iter.next()) {
-      const data = CellModel.getNbgraderData(cellModel.metadata);
+      const data = CellModel.getNbgraderData(cellModel.value.getMetadata("widgets")); // ?? Update
       const points = (data == null || data.points == null
                       || !CellModel.isGraded(data)) ? 0 : data.points;
       totalPoints += points;
@@ -1038,7 +1038,7 @@ class NotebookPanelWidget extends Panel {
     }
     if (this.cellListListener != null) {
       this.notebookWidget?.notebookPanel?.model?.cells?.changed?.disconnect(
-          this.cellListListener);
+          this.children); // ?? Update
     }
     if (this.cellModelListener != null) {
       this.notebookWidget?.cellMetadataChanged?.disconnect(
@@ -1074,7 +1074,7 @@ class NotebookPanelWidget extends Panel {
           this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
         };
     this.notebookWidget.notebookPanel.model.cells.changed.connect(
-        this.cellListListener);
+        this.children);  // ?? Update
     this.notebookWidget.cellMetadataChanged.connect(this.cellModelListener);
   }
 }

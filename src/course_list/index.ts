@@ -11,7 +11,7 @@ import { Widget } from '@lumino/widgets';
 import { requestAPI, CourseList } from './courselist';
 
 
-const PLUGIN_ID = "nbgrader/course-list";
+const PLUGIN_ID = "nbgrader:course-list";
 const COMMAND_NAME = "nbgrader:open-course-list";
 
 class CourseListWidget extends Widget {
@@ -152,7 +152,7 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
             });
         }
 
-        console.log('JupyterLab extension course-list is activated!');
+        console.log('JupyterLab development extension course-list is activated!');
   }
 };
 

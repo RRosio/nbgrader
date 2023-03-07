@@ -25,7 +25,7 @@ import {
 } from './assignmentlist';
 
 
-const PLUGIN_ID = 'nbgrader/assignment-list';
+const PLUGIN_ID = 'nbgrader:assignment-list';
 const COMMAND_NAME = "nbgrader:open-assignment-list";
 
 
@@ -37,7 +37,7 @@ class AssignmentListWidget extends Widget {
     super();
     this.app = app;
 
-    console.log('Initializing the assignments list widget');
+    console.log('Initializing the development assignments list widget');
 
     var assignment_html = ([
       '<div id="assignments" class="tab-pane">',
@@ -227,7 +227,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
       });
     }
 
-    console.log('JupyterLab extension assignment-list is activated!');
+    console.log('JupyterLab development extension assignment-list is activated!');
   }
 };
 

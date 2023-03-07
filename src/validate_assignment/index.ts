@@ -25,7 +25,7 @@ import { showNbGraderDialog, validate } from '../common/validate';
 
 var nbgrader_version = "0.8.1"; // TODO: hardcoded value
 
-const PLUGIN_ID = "nbgrader/validate-assignment"
+const PLUGIN_ID = "nbgrader:validate-assignment"
 
 class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();
@@ -180,7 +180,7 @@ export class ButtonExtension implements DocumentRegistry.IWidgetExtension<Notebo
       if (widget == undefined) {
         break;
       }
-      if (widget.node.classList.contains("jp-Toolbar-spacer")) {
+      if (widget.value.node.classList.contains("jp-Toolbar-spacer")) {  // ?? Update
         index = i;
         break;
       }

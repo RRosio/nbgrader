@@ -16,7 +16,7 @@ import {
   CreateAssignmentWidget
 } from './create_assignment_extension';
 
-const PLUGIN_ID = "nbgrader/create-assignment"
+const PLUGIN_ID = "nbgrader:create-assignment"
 
 /**
  * Initialization data for the create_assignment extension.
@@ -31,6 +31,7 @@ export const create_assignment_extension: JupyterFrontEndPlugin<void> = {
 function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker, shell: ILabShell) {
   console.log('Activating extension "create_assignment".');
 
+  // Widget is added but the functionality is missing.
   const panel = new Panel();
   panel.node.style.overflowY = 'auto';
   const createAssignmentWidget = new CreateAssignmentWidget(tracker, shell);
@@ -40,7 +41,7 @@ function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker, she
   panel.title.caption = 'nbgrader Create Assignment';
 
   app.shell.add(panel, 'right');
-  console.log('Extension "create_assignment" activated.');
+  console.log('Extension in development, "create_assignment" activated.');
 }
 
 export default create_assignment_extension;
